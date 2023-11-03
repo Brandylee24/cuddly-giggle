@@ -1,0 +1,14 @@
+.latest-adjustments {
+  width: 100%;
+  text-align: left;
+  table-layout:fixed;
+  tr, td, th {
+    border: 0px;
+  }
+  td {
+    width: 25%;
+    @media (max-width: 376px) {
+      padding: 0.85rem;
+    }
+  }
+}
