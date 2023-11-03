@@ -1,0 +1,57 @@
+
+.loading {
+  margin: auto;
+  width: 100%;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  height: 100vh;
+  align-items: center;
+}
+
+#tv-wrapper {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.chart-holder {
+  position: relative;
+  height: 655px;
+  width: 100%;
+  margin: 30px auto 0;
+}
+
+.blockchain-wrapper {
+  display: block;
+  height: 100%;
+  min-height: 240px;
+  position: relative;
+  top: 30px;
+
+  .position-container {
+    position: absolute;
+    left: 50%;
+    bottom: 170px;
+  }
+
+  #divider {
+    width: 3px;
+    height: 175px;
+    left: 0;
+    top: -40px;
+    background-image: url('/resources/divider-new.png');
+    background-repeat: repeat-y;
+    position: absolute;
+    img {
+      position: absolute;
+      left: -100px;
+      top: -28px;
+    }
+  }
+}
+.tv-container {
+  display: flex;
+  margin-top: 0px;
+  flex-direction: column;
+}
