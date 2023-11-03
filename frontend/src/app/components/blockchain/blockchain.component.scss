@@ -1,0 +1,60 @@
+#divider {
+  width: 2px;
+  height: 200px;
+  left: 0;
+  top: -50px;
+  position: absolute;
+  margin-bottom: 120px;
+}
+
+#divider > img {
+  position: absolute;
+  left: -100px;
+  top: -28px;
+}
+
+.blockchain-wrapper {
+  height: 250px;
+
+  -webkit-user-select: none; /* Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}
+
+.position-container {
+  position: absolute;
+  left: 50%;
+  top: 75px;
+}
+
+.position-container.liquid, .position-container.liquidtestnet {
+  left: 420px;
+}
+
+@media (max-width: 767.98px) {
+  .position-container {
+    left: 95%;
+  }
+  .position-container.liquid, .position-container.liquidtestnet {
+    left: 50%;
+  }
+  .position-container.loading {
+    left: 50%;
+  }
+}
+
+.black-background {
+  background-color: #11131f;
+  z-index: 100;
+  position: relative;
+}
+
+.loading-block {
+  position: absolute;
+  text-align: center;
+  margin: auto;
+  width: 300px;
+  left: -150px;
+  top: 0px;
+}
