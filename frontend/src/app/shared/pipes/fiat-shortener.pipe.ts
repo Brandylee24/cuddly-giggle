@@ -1,30 +1,20 @@
 import { formatCurrency, getCurrencySymbol } from '@angular/common';
 import { Inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { StateService } from '../../services/state.service';
 
 @Pipe({
   name: 'fiatShortener'
 })
 export class FiatShortenerPipe implements PipeTransform {
-  fiatSubscription: Subscription;
-  currency: string;
-
   constructor(
-    @Inject(LOCALE_ID) public locale: string,
-    private stateService: StateService,
-  ) {
-    this.fiatSubscription = this.stateService.fiatCurrency$.subscribe((fiat) => {
-      this.currency = fiat;
-    });
-  }
+    @Inject(LOCALE_ID) public locale: string
+  ) {}
 
   transform(num: number, ...args: any[]): unknown {
     const digits = args[0] || 1;
-    const currency = args[1] || this.currency || 'USD';
+    const unit = args[1] || undefined;
 
     if (num < 1000) {
-      return new Intl.NumberFormat(this.locale, { style: 'currency', currency, maximumFractionDigits: 1 }).format(num);
+      return num.toFixed(digits);
     }
 
     const lookup = [
@@ -40,8 +30,8 @@ export class FiatShortenerPipe implements PipeTransform {
     const item = lookup.slice().reverse().find((item) => num >= item.value);
 
     let result = item ? (num / item.value).toFixed(digits).replace(rx, '$1') : '0';
-    result = new Intl.NumberFormat(this.locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(item ? num / item.value : 0);
-    
+    result = formatCurrency(parseInt(result, 10), this.locale, getCurrencySymbol('USD', 'narrow'), 'USD', '1.0-0');
+
     return result + item.symbol;
   }
 }

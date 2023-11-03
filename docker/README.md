@@ -101,6 +101,7 @@ Below we list all settings from `mempool-config.json` and the corresponding over
     "INITIAL_BLOCKS_AMOUNT": 8,
     "MEMPOOL_BLOCKS_AMOUNT": 8,
     "BLOCKS_SUMMARIES_INDEXING": false,
+    "PRICE_FEED_UPDATE_INTERVAL": 600,
     "USE_SECOND_NODE_FOR_MINFEE": false,
     "EXTERNAL_ASSETS": ["https://raw.githubusercontent.com/mempool/mining-pools/master/pools.json"],
     "STDOUT_LOG_MIN_PRIORITY": "info",
@@ -131,6 +132,7 @@ Corresponding `docker-compose.yml` overrides:
       MEMPOOL_INITIAL_BLOCKS_AMOUNT: ""
       MEMPOOL_MEMPOOL_BLOCKS_AMOUNT: ""
       MEMPOOL_BLOCKS_SUMMARIES_INDEXING: ""
+      MEMPOOL_PRICE_FEED_UPDATE_INTERVAL: ""
       MEMPOOL_USE_SECOND_NODE_FOR_MINFEE: ""
       MEMPOOL_EXTERNAL_ASSETS: ""
       MEMPOOL_STDOUT_LOG_MIN_PRIORITY: ""

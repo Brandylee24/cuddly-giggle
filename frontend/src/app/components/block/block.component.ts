@@ -13,7 +13,6 @@ import { BlockAudit, BlockExtended, TransactionStripped } from '../../interfaces
 import { ApiService } from '../../services/api.service';
 import { BlockOverviewGraphComponent } from '../../components/block-overview-graph/block-overview-graph.component';
 import { detectWebGL } from '../../shared/graphs.utils';
-import { PriceService, Price } from 'src/app/services/price.service';
 
 @Component({
   selector: 'app-block',
@@ -58,7 +57,7 @@ export class BlockComponent implements OnInit, OnDestroy {
   transactionsError: any = null;
   overviewError: any = null;
   webGlEnabled = true;
-  auditSupported: boolean = this.stateService.env.AUDIT && this.stateService.env.BASE_MODULE === 'mempool' && this.stateService.env.MINING_DASHBOARD === true;
+  indexingAvailable = false;
   auditModeEnabled: boolean = !this.stateService.hideAudit.value;
   auditAvailable = true;
   showAudit: boolean;
@@ -82,9 +81,6 @@ export class BlockComponent implements OnInit, OnDestroy {
   timeLtr: boolean;
   childChangeSubscription: Subscription;
   auditPrefSubscription: Subscription;
-  
-  priceSubscription: Subscription;
-  blockConversion: Price;
 
   @ViewChildren('blockGraphProjected') blockGraphProjected: QueryList<BlockOverviewGraphComponent>;
   @ViewChildren('blockGraphActual') blockGraphActual: QueryList<BlockOverviewGraphComponent>;
@@ -98,8 +94,7 @@ export class BlockComponent implements OnInit, OnDestroy {
     private seoService: SeoService,
     private websocketService: WebsocketService,
     private relativeUrlPipe: RelativeUrlPipe,
-    private apiService: ApiService,
-    private priceService: PriceService,
+    private apiService: ApiService
   ) {
     this.webGlEnabled = detectWebGL();
   }
@@ -114,14 +109,13 @@ export class BlockComponent implements OnInit, OnDestroy {
       this.timeLtr = !!ltr;
     });
 
-    this.setAuditAvailable(this.auditSupported);
+    this.indexingAvailable = (this.stateService.env.BASE_MODULE === 'mempool' && this.stateService.env.MINING_DASHBOARD === true);
+    this.setAuditAvailable(this.indexingAvailable);
 
-    if (this.auditSupported) {
-      this.auditPrefSubscription = this.stateService.hideAudit.subscribe((hide) => {
-        this.auditModeEnabled = !hide;
-        this.showAudit = this.auditAvailable && this.auditModeEnabled;
-      });
-    }
+    this.auditPrefSubscription = this.stateService.hideAudit.subscribe((hide) => {
+      this.auditModeEnabled = !hide;
+      this.showAudit = this.auditAvailable && this.auditModeEnabled;
+    });
 
     this.txsLoadingStatus$ = this.route.paramMap
       .pipe(
@@ -227,9 +221,7 @@ export class BlockComponent implements OnInit, OnDestroy {
           setTimeout(() => {
             this.nextBlockSubscription = this.apiService.getBlock$(block.previousblockhash).subscribe();
             this.nextBlockTxListSubscription = this.electrsApiService.getBlockTransactions$(block.previousblockhash).subscribe();
-            if (this.auditSupported) {
-              this.apiService.getBlockAudit$(block.previousblockhash);
-            }
+            this.apiService.getBlockAudit$(block.previousblockhash);
           }, 100);
         }
         this.updateAuditAvailableFromBlockHeight(block.height);
@@ -277,7 +269,7 @@ export class BlockComponent implements OnInit, OnDestroy {
       this.isLoadingOverview = false;
     });
 
-    if (!this.auditSupported) {
+    if (!this.indexingAvailable) {
       this.overviewSubscription = block$.pipe(
         startWith(null),
         pairwise(),
@@ -308,7 +300,7 @@ export class BlockComponent implements OnInit, OnDestroy {
       });
     }
 
-    if (this.auditSupported) {
+    if (this.indexingAvailable) {
       this.auditSubscription = block$.pipe(
         startWith(null),
         pairwise(),
@@ -437,19 +429,6 @@ export class BlockComponent implements OnInit, OnDestroy {
         }
       }
     });
-
-    if (this.priceSubscription) {
-      this.priceSubscription.unsubscribe();
-    }
-    this.priceSubscription = block$.pipe(
-      switchMap((block) => {
-        return this.priceService.getPrices().pipe(
-          tap(() => {
-            this.blockConversion = this.priceService.getPriceForTimestamp(block.timestamp);
-          })
-        );
-      })
-    ).subscribe();
   }
 
   ngAfterViewInit(): void {
@@ -626,7 +605,7 @@ export class BlockComponent implements OnInit, OnDestroy {
 
   setAuditAvailable(available: boolean): void {
     this.auditAvailable = available;
-    this.showAudit = this.auditAvailable && this.auditModeEnabled && this.auditSupported;
+    this.showAudit = this.auditAvailable && this.auditModeEnabled;
   }
 
   toggleAuditMode(): void {
@@ -634,9 +613,6 @@ export class BlockComponent implements OnInit, OnDestroy {
   }
 
   updateAuditAvailableFromBlockHeight(blockHeight: number): void {
-    if (!this.auditSupported) {
-      this.setAuditAvailable(false);
-    }
     switch (this.stateService.network) {
       case 'testnet':
         if (blockHeight < this.stateService.env.TESTNET_BLOCK_AUDIT_START_HEIGHT) {

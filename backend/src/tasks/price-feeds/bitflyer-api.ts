@@ -13,11 +13,7 @@ class BitflyerApi implements PriceFeed {
 
   public async $fetchPrice(currency): Promise<number> {
     const response = await query(this.url + currency);
-    if (response && response['ltp']) {
-      return parseInt(response['ltp'], 10);
-    } else {
-      return -1;
-    }
+    return response ? parseInt(response['ltp'], 10) : -1;
   }
 
   public async $fetchRecentPrice(currencies: string[], type: 'hour' | 'day'): Promise<PriceHistory> {

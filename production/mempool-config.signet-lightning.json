@@ -38,8 +38,8 @@
     "ENABLED": true,
     "HOST": "127.0.0.1",
     "PORT": 3306,
-    "USERNAME": "__MEMPOOL_SIGNET_LIGHTNING_USER__",
-    "PASSWORD": "__MEMPOOL_SIGNET_LIGHTNING_PASS__",
+    "USERNAME": "mempool_signet_lightning",
+    "PASSWORD": "mempool_signet_lightning",
     "DATABASE": "mempool_signet_lightning"
   }
 }

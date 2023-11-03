@@ -73,7 +73,6 @@ export interface SinglePoolStats {
   emptyBlockRatio: string;
   logo: string;
   slug: string;
-  avgMatchRate: number;
 }
 export interface PoolsStats {
   blockCount: number;
@@ -150,19 +149,6 @@ export interface RewardStats {
   totalReward: number;
   totalFee: number;
   totalTx: number;
-}
-
-export interface BlockSizesAndWeights {
-  sizes: {
-    timestamp: number;
-    avgHeight: number;
-    avgSize: number;
-  }[];
-  weights: {
-    timestamp: number;
-    avgHeight: number;
-    avgWeight: number;
-  }[];
 }
 
 export interface AuditScore {
