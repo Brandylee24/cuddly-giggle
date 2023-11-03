@@ -1,0 +1,47 @@
+<app-indexing-progress></app-indexing-progress>
+
+<div class="full-container">
+
+  <div class="card-header mb-0 mb-md-4">
+    <div class="d-flex d-md-block align-items-baseline">
+      <span i18n="mining.block-rewards">Block Rewards</span>
+      <button class="btn p-0 pl-2" style="margin: 0 0 4px 0px" (click)="onSaveChart()">
+        <fa-icon [icon]="['fas', 'download']" [fixedWidth]="true"></fa-icon>
+      </button>
+    </div>  
+  
+    <form [formGroup]="radioGroupForm" class="formRadioGroup" *ngIf="(statsObservable$ | async) as stats">
+      <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" formControlName="dateSpan">
+        <label ngbButtonLabel class="btn-primary btn-sm" *ngIf="stats.blockCount >= 4320">
+          <input ngbButton type="radio" [value]="'1m'" fragment="1m" [routerLink]="['/graphs/mining/block-rewards' | relativeUrl]"> 1M
+        </label>
+        <label ngbButtonLabel class="btn-primary btn-sm" *ngIf="stats.blockCount >= 12960">
+          <input ngbButton type="radio" [value]="'3m'" fragment="3m" [routerLink]="['/graphs/mining/block-rewards' | relativeUrl]"> 3M
+        </label>
+        <label ngbButtonLabel class="btn-primary btn-sm" *ngIf="stats.blockCount >= 25920">
+          <input ngbButton type="radio" [value]="'6m'" fragment="6m" [routerLink]="['/graphs/mining/block-rewards' | relativeUrl]"> 6M
+        </label>
+        <label ngbButtonLabel class="btn-primary btn-sm" *ngIf="stats.blockCount >= 52560">
+          <input ngbButton type="radio" [value]="'1y'" fragment="1y" [routerLink]="['/graphs/mining/block-rewards' | relativeUrl]"> 1Y
+        </label>
+        <label ngbButtonLabel class="btn-primary btn-sm" *ngIf="stats.blockCount >= 105120">
+          <input ngbButton type="radio" [value]="'2y'" fragment="2y" [routerLink]="['/graphs/mining/block-rewards' | relativeUrl]"> 2Y
+        </label>
+        <label ngbButtonLabel class="btn-primary btn-sm" *ngIf="stats.blockCount >= 157680">
+          <input ngbButton type="radio" [value]="'3y'" fragment="3y" [routerLink]="['/graphs/mining/block-rewards' | relativeUrl]"> 3Y
+        </label>
+        <label ngbButtonLabel class="btn-primary btn-sm">
+          <input ngbButton type="radio" [value]="'all'" fragment="all" [routerLink]="['/graphs/mining/block-rewards' | relativeUrl]"> ALL
+        </label>
+      </div>
+    </form>
+  </div>
+
+  <div class="chart" echarts [initOpts]="chartInitOptions" [options]="chartOptions"
+    (chartInit)="onChartInit($event)">
+  </div>
+  <div class="text-center loadingGraphs" *ngIf="isLoading">
+    <div class="spinner-border text-light"></div>
+  </div>
+
+</div>
