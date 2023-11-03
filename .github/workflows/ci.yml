@@ -1,0 +1,92 @@
+name: CI Pipeline for the Backend and Frontend
+
+on:
+  pull_request:
+    types: [ opened, review_requested, synchronize ]
+env:
+  NODE_VERSION: 16.15.0
+
+jobs:
+  backend:
+    if: "!contains(github.event.pull_request.labels.*.name, 'ops') && !contains(github.head_ref, 'ops/')"
+    strategy:
+      matrix:
+        flavor: ['dev', 'prod']
+    runs-on: 'ubuntu-latest'
+
+    name: Backend (${{ matrix.flavor }})
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: ${{ matrix.flavor }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install
+        if: ${{ matrix.flavor == 'dev'}}
+        run: npm ci
+        working-directory: ${{ matrix.flavor }}/backend
+
+      - name: Install (Prod dependencies only)
+        if: ${{ matrix.flavor == 'prod'}}
+        run: npm ci --prod --no-optional
+        working-directory: ${{ matrix.flavor }}/backend
+
+      - name: Lint 
+        if: ${{ matrix.flavor == 'dev'}}
+        run: npm run lint
+        working-directory: ${{ matrix.flavor }}/backend
+
+    #  - name: Test 
+    #    run: npm run test
+
+      - name: Build
+        run: npm run build
+        working-directory: ${{ matrix.flavor }}/backend
+
+  frontend:
+    if: "!contains(github.event.pull_request.labels.*.name, 'ops') && !contains(github.head_ref, 'ops/')"
+    strategy:
+      matrix:
+        flavor: ['dev', 'prod']
+    runs-on: 'ubuntu-latest'
+
+    name: Frontend (${{ matrix.flavor }})
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: ${{ matrix.flavor }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install (Prod dependencies only)
+        run: npm ci --prod --no-optional
+        if: ${{ matrix.flavor == 'prod'}}
+        working-directory: ${{ matrix.flavor }}/frontend
+
+      - name: Install
+        if: ${{ matrix.flavor == 'dev'}}
+        run: npm ci
+        working-directory: ${{ matrix.flavor }}/frontend
+
+      - name: Lint
+        if: ${{ matrix.flavor == 'dev'}}
+        run: npm run lint
+        working-directory: ${{ matrix.flavor }}/frontend
+
+      # - name: Test 
+      #   run: npm run test
+
+      - name: Build
+        run: npm run build
+        working-directory: ${{ matrix.flavor }}/frontend
