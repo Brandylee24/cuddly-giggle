@@ -1,0 +1,32 @@
+<div class="mempool-blocks-container">
+  <div class="flashing">
+    <ng-template ngFor let-projectedBlock [ngForOf]="mempoolBlocks" let-i="index" [ngForTrackBy]="trackByFn">
+      <div class="bitcoin-block text-center mempool-block" id="mempool-block-{{ i }}" [ngStyle]="mempoolBlockStyles[i]">
+        <a [routerLink]="['/mempool-block/' | relativeUrl, i]" class="blockLink">&nbsp;</a>
+        <div class="block-body" *ngIf="mempoolBlocks?.length">
+          <div class="fees">
+            ~{{ projectedBlock.medianFee | number:'1.0-0' }} sat/vB
+          </div>
+          <div class="fee-span">
+            {{ projectedBlock.feeRange[0] | number:'1.0-0' }} - {{ projectedBlock.feeRange[projectedBlock.feeRange.length - 1] | number:'1.0-0' }} sat/vB
+          </div>
+          <div class="block-size">{{ projectedBlock.blockSize | bytes: 2 }}</div>
+          <div class="transaction-count">{{ projectedBlock.nTx | number }} transactions</div>
+          <div class="time-difference" *ngIf="projectedBlock.blockVSize <= 1000000; else mergedBlock">
+            <ng-template [ngIf]="network === 'liquid'" [ngIfElse]="timeDiffMainnet">
+              In &lt; {{ 1 * i + 1 }} minute
+            </ng-template>
+            <ng-template #timeDiffMainnet>
+              In ~{{ 10 * i + 10 }} minutes
+            </ng-template>
+          </div>
+          <ng-template #mergedBlock>
+            <div class="time-difference"><b>({{ projectedBlock.blockVSize / 1000000 | ceil }} blocks)</b></div>
+          </ng-template>
+        </div>
+        <span class="animated-border"></span>
+      </div>
+    </ng-template>
+  </div>
+  <div *ngIf="arrowVisible" id="arrow-up" [ngStyle]="{'right': rightPosition + 75 + 'px', transition: transition }"></div>
+</div>

@@ -1,0 +1,25 @@
+{
+  "/api/v1": {
+    "target": "http://localhost:8999/",
+    "secure": false
+  },
+  "/api/v1/ws": {
+    "target": "http://localhost:8999/",
+    "secure": false,
+    "ws": true
+  },
+  "/bisq/api": {
+    "target": "http://localhost:8999/",
+    "secure": false,
+    "pathRewrite": {
+      "^/bisq/api": "/api/v1/bisq"
+    }
+  },
+  "/api": {
+    "target": "http://localhost:50001/",
+    "secure": false,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}

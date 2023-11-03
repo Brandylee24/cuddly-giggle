@@ -1,0 +1,37 @@
+#!/usr/local/bin/zsh -x
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:$HOME/bin
+
+[ -f $HOME/lock ] && exit 1
+touch $HOME/lock
+
+echo 'rebuilding mempool sites'|wall
+
+cd "$HOME/mempool"
+git pull --rebase origin master
+cd "$HOME/"
+
+for site in mainnet liquid testnet bisq
+do
+    cd "$HOME/${site}"
+    git pull --rebase origin master
+    hash=$(git rev-parse HEAD)
+
+    if [ "${site}" = "mainnet" ]
+    then
+        cd "$HOME/${site}/frontend"
+        npm install
+        npm run build
+        rsync -av ./dist/mempool/* "${HOME}/public_html/${site}/"
+    fi
+
+    cd "$HOME/${site}/backend"
+    npm install
+    npm run build
+done
+
+ps uaxw|grep 'node dist/index'|grep -v grep|awk '{print $2}'|xargs -n 1 kill
+
+hostname=$(hostname)
+keybase chat send --channel dev mempool "${hostname} updated to ${hash}"
+
+rm "$HOME/lock"
