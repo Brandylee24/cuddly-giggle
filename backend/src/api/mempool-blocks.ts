@@ -33,7 +33,7 @@ class MempoolBlocks {
     return this.mempoolBlockDeltas;
   }
 
-  public updateMempoolBlocks(memPool: { [txid: string]: TransactionExtended }, saveResults: boolean = false): MempoolBlockWithTransactions[] {
+  public updateMempoolBlocks(memPool: { [txid: string]: TransactionExtended }): void {
     const latestMempool = memPool;
     const memPoolArray: TransactionExtended[] = [];
     for (const i in latestMempool) {
@@ -75,14 +75,10 @@ class MempoolBlocks {
     logger.debug('Mempool blocks calculated in ' + time / 1000 + ' seconds');
 
     const blocks = this.calculateMempoolBlocks(memPoolArray, this.mempoolBlocks);
+    const deltas = this.calculateMempoolDeltas(this.mempoolBlocks, blocks);
 
-    if (saveResults) {
-      const deltas = this.calculateMempoolDeltas(this.mempoolBlocks, blocks);
-      this.mempoolBlocks = blocks;
-      this.mempoolBlockDeltas = deltas;
-    }
-
-    return blocks;
+    this.mempoolBlocks = blocks;
+    this.mempoolBlockDeltas = deltas;
   }
 
   private calculateMempoolBlocks(transactionsSorted: TransactionExtended[], prevBlocks: MempoolBlockWithTransactions[]): MempoolBlockWithTransactions[] {
@@ -147,7 +143,7 @@ class MempoolBlocks {
     return mempoolBlockDeltas;
   }
 
-  public async makeBlockTemplates(newMempool: { [txid: string]: TransactionExtended }, saveResults: boolean = false): Promise<MempoolBlockWithTransactions[]> {
+  public async makeBlockTemplates(newMempool: { [txid: string]: TransactionExtended }): Promise<void> {
     // prepare a stripped down version of the mempool with only the minimum necessary data
     // to reduce the overhead of passing this data to the worker thread
     const strippedMempool: { [txid: string]: ThreadTransaction } = {};
@@ -188,21 +184,19 @@ class MempoolBlocks {
       this.txSelectionWorker.postMessage({ type: 'set', mempool: strippedMempool });
       const { blocks, clusters } = await workerResultPromise;
 
+      this.processBlockTemplates(newMempool, blocks, clusters);
+
       // clean up thread error listener
       this.txSelectionWorker?.removeListener('error', threadErrorListener);
-
-      return this.processBlockTemplates(newMempool, blocks, clusters, saveResults);
     } catch (e) {
       logger.err('makeBlockTemplates failed. ' + (e instanceof Error ? e.message : e));
     }
-    return this.mempoolBlocks;
   }
 
-  public async updateBlockTemplates(newMempool: { [txid: string]: TransactionExtended }, added: TransactionExtended[], removed: string[], saveResults: boolean = false): Promise<void> {
+  public async updateBlockTemplates(newMempool: { [txid: string]: TransactionExtended }, added: TransactionExtended[], removed: string[]): Promise<void> {
     if (!this.txSelectionWorker) {
       // need to reset the worker
-      this.makeBlockTemplates(newMempool, saveResults);
-      return;
+      return this.makeBlockTemplates(newMempool);
     }
     // prepare a stripped down version of the mempool with only the minimum necessary data
     // to reduce the overhead of passing this data to the worker thread
@@ -230,16 +224,16 @@ class MempoolBlocks {
       this.txSelectionWorker.postMessage({ type: 'update', added: addedStripped, removed });
       const { blocks, clusters } = await workerResultPromise;
 
+      this.processBlockTemplates(newMempool, blocks, clusters);
+
       // clean up thread error listener
       this.txSelectionWorker?.removeListener('error', threadErrorListener);
-
-      this.processBlockTemplates(newMempool, blocks, clusters, saveResults);
     } catch (e) {
       logger.err('updateBlockTemplates failed. ' + (e instanceof Error ? e.message : e));
     }
   }
 
-  private processBlockTemplates(mempool, blocks, clusters, saveResults): MempoolBlockWithTransactions[] {
+  private processBlockTemplates(mempool, blocks, clusters): void {
     // update this thread's mempool with the results
     blocks.forEach(block => {
       block.forEach(tx => {
@@ -284,13 +278,10 @@ class MempoolBlocks {
       }).filter(tx => !!tx), undefined, undefined, blockIndex);
     });
 
-    if (saveResults) {
-      const deltas = this.calculateMempoolDeltas(this.mempoolBlocks, mempoolBlocks);
-      this.mempoolBlocks = mempoolBlocks;
-      this.mempoolBlockDeltas = deltas;
-    }
+    const deltas = this.calculateMempoolDeltas(this.mempoolBlocks, mempoolBlocks);
 
-    return mempoolBlocks;
+    this.mempoolBlocks = mempoolBlocks;
+    this.mempoolBlockDeltas = deltas;
   }
 
   private dataToMempoolBlocks(transactions: TransactionExtended[],

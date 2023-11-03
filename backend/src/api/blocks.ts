@@ -17,6 +17,7 @@ import { prepareBlock } from '../utils/blocks-utils';
 import BlocksRepository from '../repositories/BlocksRepository';
 import HashratesRepository from '../repositories/HashratesRepository';
 import indexer from '../indexer';
+import fiatConversion from './fiat-conversion';
 import poolsParser from './pools-parser';
 import BlocksSummariesRepository from '../repositories/BlocksSummariesRepository';
 import BlocksAuditsRepository from '../repositories/BlocksAuditsRepository';
@@ -169,7 +170,7 @@ class Blocks {
     blockExtended.extras.reward = transactions[0].vout.reduce((acc, curr) => acc + curr.value, 0);
     blockExtended.extras.coinbaseTx = transactionUtils.stripCoinbaseTransaction(transactions[0]);
     blockExtended.extras.coinbaseRaw = blockExtended.extras.coinbaseTx.vin[0].scriptsig;
-    blockExtended.extras.usd = priceUpdater.latestPrices.USD;
+    blockExtended.extras.usd = fiatConversion.getConversionRates().USD;
 
     if (block.height === 0) {
       blockExtended.extras.medianFee = 0; // 50th percentiles
@@ -211,11 +212,9 @@ class Blocks {
         };
       }
 
-      if (config.MEMPOOL.AUDIT) {
-        const auditScore = await BlocksAuditsRepository.$getBlockAuditScore(block.id);
-        if (auditScore != null) {
-          blockExtended.extras.matchRate = auditScore.matchRate;
-        }
+      const auditScore = await BlocksAuditsRepository.$getBlockAuditScore(block.id);
+      if (auditScore != null) {
+        blockExtended.extras.matchRate = auditScore.matchRate;
       }
     }
 
@@ -600,11 +599,9 @@ class Blocks {
    * Index a block if it's missing from the database. Returns the block after indexing
    */
   public async $indexBlock(height: number): Promise<BlockExtended> {
-    if (Common.indexingEnabled()) {
-      const dbBlock = await blocksRepository.$getBlockByHeight(height);
-      if (dbBlock !== null) {
-        return prepareBlock(dbBlock);
-      }
+    const dbBlock = await blocksRepository.$getBlockByHeight(height);
+    if (dbBlock != null) {
+      return prepareBlock(dbBlock);
     }
 
     const blockHash = await bitcoinApi.$getBlockHash(height);
@@ -612,9 +609,7 @@ class Blocks {
     const transactions = await this.$getTransactionsExtended(blockHash, block.height, true);
     const blockExtended = await this.$getBlockExtended(block, transactions);
 
-    if (Common.indexingEnabled()) {
-      await blocksRepository.$saveBlockInDatabase(blockExtended);
-    }
+    await blocksRepository.$saveBlockInDatabase(blockExtended);
 
     return prepareBlock(blockExtended);
   }
@@ -718,7 +713,7 @@ class Blocks {
         block = await this.$indexBlock(currentHeight);
         returnBlocks.push(block);
       } else if (nextHash != null) {
-        block = await this.$indexBlock(currentHeight);
+        block = prepareBlock(await bitcoinClient.getBlock(nextHash));
         nextHash = block.previousblockhash;
         returnBlocks.push(block);
       }
