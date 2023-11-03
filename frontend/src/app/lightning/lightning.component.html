@@ -1,0 +1,253 @@
+<br>
+
+<div class="container-xl dashboard-container">
+  <div class="row row-cols-1 row-cols-md-2" *ngIf="{ value: (mempoolInfoData$ | async) } as mempoolInfoData">
+    <ng-template [ngIf]="collapseLevel === 'three'" [ngIfElse]="expanded">
+      <div class="col card-wrapper">
+        <div class="main-title" i18n="fees-box.transaction-fees">Transaction Fees</div>
+        
+      </div>
+      <div class="col">
+        <app-difficulty></app-difficulty>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-body">
+            <ng-container *ngTemplateOutlet="lbtcPegs; context: { $implicit: mempoolInfoData }"></ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-body">
+            <ng-container *ngTemplateOutlet="mempoolTable; context: { $implicit: mempoolInfoData }"></ng-container>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+    <ng-template #expanded>
+      <ng-container>
+        <div class="col card-wrapper">
+          <div class="main-title" i18n="fees-box.transaction-fees">Network statistics</div>
+          <div class="card">
+            <div class="card-body">
+              <div class="fee-estimation-wrapper">
+                <div class="fee-estimation-container">
+                  <div class="item">
+                    <h5 class="card-title" i18n="fees-box.low-priority">Nodes</h5>
+                    <div class="card-text" i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom">
+                      <div class="fee-text">{{ 18768 | number }}</div> <span class="green-color">+5%</span>
+                    </div>
+                  </div>
+                  <div class="item">
+                    <h5 class="card-title" i18n="fees-box.medium-priority">Channels</h5>
+                    <div class="card-text" i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom">
+                      <div class="fee-text">{{  83074 | number }}</div> <span class="green-color">+8%</span>
+                    </div>
+                  </div>
+                  <div class="item">
+                    <h5 class="card-title" i18n="fees-box.high-priority">Active Nodes</h5>
+                    <div class="card-text" i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom">
+                      <div class="fee-text">{{ 20181 | number }}</div> <span class="green-color red">-2.20%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col card-wrapper">
+          <div class="main-title" i18n="fees-box.transaction-fees">Updated last 24H</div>
+          <div class="card">
+            <div class="card-body">
+              <div class="fee-estimation-wrapper">
+                <div class="fee-estimation-container">
+                  <div class="item">
+                    <h5 class="card-title" i18n="fees-box.low-priority">New Nodes</h5>
+                    <div class="card-text" i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom">
+                      <div class="fee-text">{{ 29 | number }}</div> <span class="green-color">+16%</span>
+                    </div>
+                  </div>
+                  <div class="item">
+                    <h5 class="card-title" i18n="fees-box.medium-priority">New Channels</h5>
+                    <div class="card-text" i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom">
+                      <div class="fee-text">{{  343 | number }}</div> <span class="green-color red">-11.14%</span>
+                    </div>
+                  </div>
+                  <div class="item">
+                    <h5 class="card-title" i18n="fees-box.high-priority">Updated nodes</h5>
+                    <div class="card-text" i18n-ngbTooltip="Transaction fee tooltip" ngbTooltip="Based on average native segwit transaction of 140 vBytes" placement="bottom">
+                      <div class="fee-text">{{ 10288 | number }}</div> <span class="green-color">+5%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      <div class="col">
+        <div class="card graph-card">
+          <div class="card-body pl-0">
+            <div style="padding-left: 1.25rem;">
+              <ng-container *ngTemplateOutlet="lbtcPegs; context: { $implicit: mempoolInfoData }"></ng-container>
+              <hr>
+            </div>
+            <ng-template [ngIf]="(network$ | async) !== 'liquid'" [ngIfElse]="liquidPegs">
+              
+            </ng-template>
+            <ng-template #liquidPegs>
+              <app-lbtc-pegs-graph [data]="liquidPegsMonth$ | async"></app-lbtc-pegs-graph>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+      <ng-template [ngIf]="collapseLevel === 'one'">
+      <div class="col">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title" i18n="dashboard.latest-blocks">Top Capacity Nodes</h5>
+            <table class="table lastest-blocks-table">
+              <thead>
+                <th class="table-cell-height" i18n="dashboard.latest-blocks.height">Name</th>
+                <th class="table-cell-mined" i18n="dashboard.latest-blocks.mined">Capacity</th>
+                <th class="table-cell-mined pl-lg-4" i18n="mining.pool-name">Channels</th>
+                <th class="table-cell-transaction-count" i18n="dashboard.latest-blocks.transaction-count">Public Key</th>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="table-cell-height"><a href="">bfx-lnd0</a></td>
+                  <td class="table-cell-mined" > <app-amount [satoshis]="357.652313880 * 100000000" digitsInfo="1.0-0" [noFiat]="true"></app-amount></td>
+                  <td class="table-cell-transaction-count">{{ 833 | number }}</td>
+                  <td class="table-cell-transaction-count"><a href="">{{ '03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f' | shortenString : 10 }}</a></td>
+                </tr>
+                <tr>
+                  <td class="table-cell-height"><a href="">ACINQ</a></td>
+                  <td class="table-cell-mined" > <app-amount [satoshis]="344.173561570 * 100000000" digitsInfo="1.0-0" [noFiat]="true"></app-amount></td>
+                  <td class="table-cell-transaction-count">{{ 3174 | number }}</td>
+                  <td class="table-cell-transaction-count"><a href="">{{ '03864ef025fde8fb587d989186ce6a4a186895ee44a926bfc370e2c366597a3f8f' | shortenString : 10 }}</a></td>
+                </tr>
+                <tr>
+                  <td class="table-cell-height"><a href="">bfx-lnd1</a></td>
+                  <td class="table-cell-mined" > <app-amount [satoshis]="310.796691790 * 100000000" digitsInfo="1.0-0" [noFiat]="true"></app-amount></td>
+                  <td class="table-cell-transaction-count">{{ 739 | number }}</td>
+                  <td class="table-cell-transaction-count"><a href="">{{ '03cde60a6323f7122d5178255766e38114b4722ede08f7c9e0c5df9b912cc201d6' | shortenString : 10 }}</a></td>
+                </tr>
+                <tr>
+                  <td class="table-cell-height"><a href="">LNBIG.com [lnd-12]</a></td>
+                  <td class="table-cell-mined" > <app-amount [satoshis]="119.608851060 * 100000000" digitsInfo="1.0-0" [noFiat]="true"></app-amount></td>
+                  <td class="table-cell-transaction-count">{{ 461 | number }}</td>
+                  <td class="table-cell-transaction-count"><a href="">{{ '034ea80f8b148c750463546bd999bf7321a0e6dfc60aaf84bd0400a2e8d376c0d5' | shortenString : 10 }}</a></td>
+                </tr>
+                <tr>
+                  <td class="table-cell-height"><a href="">WalletOfSatoshi.com</a></td>
+                  <td class="table-cell-mined" > <app-amount [satoshis]="107.972774900 * 100000000" digitsInfo="1.0-0" [noFiat]="true"></app-amount></td>
+                  <td class="table-cell-transaction-count">{{ 2265 | number }}</td>
+                  <td class="table-cell-transaction-count"><a href="">{{ '035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226' | shortenString : 10 }}</a></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class=""><a href="" [routerLink]="[(stateService.env.MINING_DASHBOARD ? '/mining/blocks' : '/blocks') | relativeUrl]" i18n="dashboard.view-all">View all &raquo;</a></div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+    </ng-template>
+  </div>
+
+  <app-language-selector></app-language-selector>
+
+  <div class="terms-of-service">
+    <a [routerLink]="['/terms-of-service']" i18n="shared.terms-of-service|Terms of Service">Terms of Service</a>
+    |
+    <a [routerLink]="['/privacy-policy']" i18n="shared.privacy-policy|Privacy Policy">Privacy Policy</a>
+    |
+    <a [routerLink]="['/tx/push' | relativeUrl]" i18n="shared.broadcast-transaction|Broadcast Transaction">Broadcast Transaction</a>
+  </div>
+
+</div>
+
+<ng-template #loadingAssetsTable>
+  <table class="table table-borderless table-striped asset-table">
+    <tbody>
+      <tr *ngFor="let i of [1,2,3,4]">
+        <td class="asset-icon">
+          <div class="skeleton-loader skeleton-loader-transactions"></div>
+        </td>
+        <td class="asset-title">
+          <div class="skeleton-loader skeleton-loader-transactions"></div>
+        </td>
+        <td class="asset-title d-none d-md-table-cell">
+          <div class="skeleton-loader skeleton-loader-transactions"></div>
+        </td>
+        <td class="asset-title">
+          <div class="skeleton-loader skeleton-loader-transactions"></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>
+
+<ng-template #loadingTransactions>
+  <div class="skeleton-loader skeleton-loader-transactions"></div>
+</ng-template>
+
+<ng-template #loading>
+  <div class="skeleton-loader"></div>
+</ng-template>
+
+<ng-template #loadingbig>
+  <span class="skeleton-loader skeleton-loader-big" ></span>
+</ng-template>
+
+<ng-template #emptyBlock>
+  <div class="col">
+
+  </div>
+</ng-template>
+
+<ng-template #mempoolTable let-mempoolInfoData>
+  <div class="mempool-info-data">
+    <div class="item">
+      <h5>Minimum fee</h5>
+      <ng-template #purgingText><h5 class="card-title" i18n="dashboard.purging|Purgin below fee">Purging</h5></ng-template>
+      <p class="card-text">
+      </p>
+    </div>
+    <div class="item">
+      <h5 class="card-title" i18n="dashboard.unconfirmed|Unconfirmed count">Unconfirmed</h5>
+      <p class="card-text">
+        {{ 4242442 | number }} <span i18n="dashboard.txs">TXs</span>
+      </p>
+    </div>
+    <div class="item bar">
+      <h5 class="card-title" i18n="dashboard.memory-usage|Memory usage">Memory usage</h5>
+      <div class="card-text">
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" [ngStyle]="{'width': '100%' }">&nbsp;</div>
+          <div class="progress-text">&lrm;<span [innerHTML]="424242424242 | bytes"></span> / <span [innerHTML]="3000000000000 | bytes"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #lbtcPegs let-mempoolInfoData>
+  <div class="mempool-info-data">
+    <div class="item">
+      <h5 class="card-title" i18n="dashboard.lbtc-pegs-in-circulation">Network Capacity</h5>
+      <ng-container *ngIf="(liquidPegsMonth$ | async) as liquidPegsMonth; else loadingTransactions">
+        <p class="card-text">{{ 3707.88 | number: '1.2-2' }} <span>BTC</span></p>
+      </ng-container>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #txPerSecond let-mempoolInfoData>
+  <h5 class="card-title" i18n="dashboard.incoming-transactions">Incoming transactions</h5>
+  
+      <div class="progress inc-tx-progress-bar">
+        <div class="progress-bar" role="progressbar" [ngStyle]="{'width': '100%', 'background-color': 'green'}">&nbsp;</div>
+        <div class="progress-text">&lrm;{{ 424242 | ceil | number }} <ng-container i18n="shared.vbytes-per-second|vB/s">vB/s</ng-container></div>
+      </div>
+</ng-template>

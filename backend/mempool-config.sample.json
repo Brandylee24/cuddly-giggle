@@ -1,0 +1,78 @@
+{
+  "MEMPOOL": {
+    "NETWORK": "mainnet",
+    "BACKEND": "electrum",
+    "HTTP_PORT": 8999,
+    "SPAWN_CLUSTER_PROCS": 0,
+    "API_URL_PREFIX": "/api/v1/",
+    "POLL_RATE_MS": 2000,
+    "CACHE_DIR": "./cache",
+    "CLEAR_PROTECTION_MINUTES": 20,
+    "RECOMMENDED_FEE_PERCENTILE": 50,
+    "BLOCK_WEIGHT_UNITS": 4000000,
+    "INITIAL_BLOCKS_AMOUNT": 8,
+    "MEMPOOL_BLOCKS_AMOUNT": 8,
+    "INDEXING_BLOCKS_AMOUNT": 11000,
+    "PRICE_FEED_UPDATE_INTERVAL": 600,
+    "USE_SECOND_NODE_FOR_MINFEE": false,
+    "EXTERNAL_ASSETS": [
+      "https://raw.githubusercontent.com/mempool/mining-pools/master/pools.json"
+    ],
+    "STDOUT_LOG_MIN_PRIORITY": "debug"
+  },
+  "CORE_RPC": {
+    "HOST": "127.0.0.1",
+    "PORT": 8332,
+    "USERNAME": "mempool",
+    "PASSWORD": "mempool"
+  },
+  "ELECTRUM": {
+    "HOST": "127.0.0.1",
+    "PORT": 50002,
+    "TLS_ENABLED": true
+  },
+  "ESPLORA": {
+    "REST_API_URL": "http://127.0.0.1:3000"
+  },
+  "SECOND_CORE_RPC": {
+    "HOST": "127.0.0.1",
+    "PORT": 8332,
+    "USERNAME": "mempool",
+    "PASSWORD": "mempool"
+  },
+  "DATABASE": {
+    "ENABLED": true,
+    "HOST": "127.0.0.1",
+    "PORT": 3306,
+    "SOCKET": "/var/run/mysql/mysql.sock",
+    "DATABASE": "mempool",
+    "USERNAME": "mempool",
+    "PASSWORD": "mempool"
+  },
+  "SYSLOG": {
+    "ENABLED": true,
+    "HOST": "127.0.0.1",
+    "PORT": 514,
+    "MIN_PRIORITY": "info",
+    "FACILITY": "local7"
+  },
+  "STATISTICS": {
+    "ENABLED": true,
+    "TX_PER_SECOND_SAMPLE_PERIOD": 150
+  },
+  "BISQ": {
+    "ENABLED": false,
+    "DATA_PATH": "/bisq/statsnode-data/btc_mainnet/db"
+  },
+  "SOCKS5PROXY": {
+    "ENABLED": false,
+    "HOST": "127.0.0.1",
+    "PORT": 9050,
+    "USERNAME": "",
+    "PASSWORD": ""
+  },
+  "PRICE_DATA_SERVER": {
+    "TOR_URL": "http://wizpriceje6q5tdrxkyiazsgu7irquiqjy2dptezqhrtu7l2qelqktid.onion/getAllMarketPrices",
+    "CLEARNET_URL": "https://price.bisq.wiz.biz/getAllMarketPrices"
+  }
+}
