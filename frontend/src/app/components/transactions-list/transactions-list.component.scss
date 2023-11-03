@@ -1,0 +1,134 @@
+.arrow-td {
+	width: 22px;
+}
+
+.arrow {
+	display: inline-block!important;
+	position: relative;
+	width: 14px;
+	height: 22px;
+	box-sizing: content-box
+}
+
+.arrow:before {
+	position: absolute;
+	content: '';
+	margin: auto;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: calc(-1*30px/3);
+	width: 0;
+  	height: 0;
+	border-top: 6.66px solid transparent;
+  	border-bottom: 6.66px solid transparent
+}
+
+.arrow:after {
+	position: absolute;
+	content: '';
+	margin: auto;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: calc(30px/6);
+	width: calc(30px/3);
+	height: calc(20px/3);
+	background: rgba(0, 0, 0, 0);
+}
+
+.arrow.green:before {
+  	border-left: 10px solid #28a745;
+}
+.arrow.green:after {
+  	background-color:#28a745;
+}
+
+.arrow.red:before {
+  	border-left: 10px solid #dc3545;
+}
+.arrow.red:after {
+  	background-color:#dc3545;
+}
+
+.arrow.grey:before {
+  	border-left: 10px solid #6c757d;
+}
+
+.arrow.grey:after {
+  	background-color:#6c757d;
+}
+
+.mobile-bottomcol {
+	margin-top: 15px;
+	@media (min-width: 992px) {
+		margin-top: 0px;
+	}
+}
+
+.details-table {
+	margin-top: 5px;
+}
+
+.details-table td {
+	padding: 0.75rem;
+	&:first-child {
+		white-space: pre-wrap;
+	}
+}
+
+.details-table td:nth-child(2) {
+	word-break: break-all;
+	white-space: normal;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 12px;
+}
+
+.smaller-text {
+	font-size: 12px;
+	@media (min-width: 576px) {
+		font-size: 14px !important;
+	}
+}
+
+.row{
+	flex-direction: column;
+	@media (min-width: 992px) {
+		flex-direction: row;
+	}
+}
+
+.extra-info {	
+	display: none;
+	@media (min-width: 576px) {
+		display: inline-table;
+	}
+	.fiat {
+		font-size: 14px;
+		margin-left: 10px;
+		text-align: right;
+	}
+	.sats {
+		color: #ffffff66;
+		font-size: 11px;
+	}
+}
+
+.transaction-fee {
+	display: block;
+	margin: 0px auto 5px;
+	@media (min-width: 576px) {
+		display: inline-table;
+	}
+}
+
+.btn-container {
+	text-align: right;
+	@media (min-width: 576px) {
+		display: inline-table;
+		float: right;
+	}
+}
+.fiat {
+	margin-left: 10px; 
+}

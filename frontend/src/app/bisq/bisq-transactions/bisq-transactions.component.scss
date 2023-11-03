@@ -1,0 +1,20 @@
+label {
+  padding: 0.25rem 1rem;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .dropdown-menu {
+  right: 0px;
+  left: inherit;
+}
+
+.pagination {
+  overflow: hidden;
+}
+
+h1{
+  font-size: 1.5rem;
+  @media(min-width: 375px){
+    font-size: 2rem;
+  }
+}
