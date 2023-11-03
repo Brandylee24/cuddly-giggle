@@ -1,0 +1,50 @@
+#!/usr/local/bin/zsh -x
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:$HOME/bin
+
+if [ -f $HOME/lock ];then
+    echo "check lockfile"
+    exit 1
+fi
+
+touch $HOME/lock
+
+export NVM_DIR="$HOME/.nvm"
+source "$NVM_DIR/nvm.sh"
+
+REPO=origin
+BRANCH=master
+
+TAG="${BRANCH}"
+[ ! -z "$1" ] && TAG=$1
+
+echo "upgrading mempool to ${TAG}" | wall
+
+cd "$HOME/mempool"
+git fetch "${REPO}"
+git reset --hard "${REPO}/${TAG}"
+cd "$HOME/"
+
+for site in mainnet liquid testnet bisq
+do
+    cd "$HOME/${site}"
+    git fetch "${REPO}"
+    git reset --hard "${REPO}/${TAG}"
+    hash=$(git rev-parse HEAD)
+
+    if [ "${site}" = "mainnet" ]
+    then
+        cd "$HOME/${site}/frontend"
+        npm install
+        npm run build
+        rsync -av ./dist/mempool/browser/* "${HOME}/public_html/${site}/"
+    fi
+
+    cd "$HOME/${site}/backend"
+    npm install
+    npm run build
+done
+
+hostname=$(hostname)
+keybase chat send mempool.space "${hostname} updated to ${TAG} @ ${hash}"
+
+rm "$HOME/lock"
