@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { CpfpInfo, OptimizedMempoolStats, AddressInformation, LiquidPegs, ITranslators,
-  PoolStat, BlockExtended, TransactionStripped, RewardStats, AuditScore, BlockSizesAndWeights } from '../interfaces/node-api.interface';
+  PoolStat, BlockExtended, TransactionStripped, RewardStats, AuditScore } from '../interfaces/node-api.interface';
 import { Observable } from 'rxjs';
 import { StateService } from './state.service';
 import { WebsocketResponse } from '../interfaces/websocket.interface';
 import { Outspend, Transaction } from '../interfaces/electrs.interface';
-import { Conversion } from './price.service';
 
 @Injectable({
   providedIn: 'root'
@@ -223,8 +222,8 @@ export class ApiService {
     );
   }
 
-  getHistoricalBlockSizesAndWeights$(interval: string | undefined) : Observable<HttpResponse<BlockSizesAndWeights>> {
-    return this.httpClient.get<BlockSizesAndWeights>(
+  getHistoricalBlockSizesAndWeights$(interval: string | undefined) : Observable<any> {
+    return this.httpClient.get<any[]>(
       this.apiBaseUrl + this.apiBasePath + `/api/v1/mining/blocks/sizes-weights` +
       (interval !== undefined ? `/${interval}` : ''), { observe: 'response' }
     );
@@ -303,9 +302,5 @@ export class ApiService {
         (publicKey !== undefined ? `/${publicKey}`   : '') +
         (style     !== undefined ? `?style=${style}` : '')
     );
-  }
-
-  getHistoricalPrice$(): Observable<Conversion> {
-    return this.httpClient.get<Conversion>( this.apiBaseUrl + this.apiBasePath + '/api/v1/historical-price');
   }
 }

@@ -8,6 +8,7 @@ import blocks from './blocks';
 import memPool from './mempool';
 import backendInfo from './backend-info';
 import mempoolBlocks from './mempool-blocks';
+import fiatConversion from './fiat-conversion';
 import { Common } from './common';
 import loadingIndicators from './loading-indicators';
 import config from '../config';
@@ -18,8 +19,6 @@ import feeApi from './fee-api';
 import BlocksAuditsRepository from '../repositories/BlocksAuditsRepository';
 import BlocksSummariesRepository from '../repositories/BlocksSummariesRepository';
 import Audit from './audit';
-import { deepClone } from '../utils/clone';
-import priceUpdater from '../tasks/price-updater';
 
 class WebsocketHandler {
   private wss: WebSocket.Server | undefined;
@@ -214,7 +213,7 @@ class WebsocketHandler {
       'mempoolInfo': memPool.getMempoolInfo(),
       'vBytesPerSecond': memPool.getVBytesPerSecond(),
       'blocks': _blocks,
-      'conversions': priceUpdater.latestPrices,
+      'conversions': fiatConversion.getConversionRates(),
       'mempool-blocks': mempoolBlocks.getMempoolBlocks(),
       'transactions': memPool.getLatestTransactions(),
       'backendInfo': backendInfo.getBackendInfo(),
@@ -252,9 +251,9 @@ class WebsocketHandler {
     }
 
     if (config.MEMPOOL.ADVANCED_GBT_MEMPOOL) {
-      await mempoolBlocks.updateBlockTemplates(newMempool, newTransactions, deletedTransactions.map(tx => tx.txid), true);
+      await mempoolBlocks.updateBlockTemplates(newMempool, newTransactions, deletedTransactions.map(tx => tx.txid));
     } else {
-      mempoolBlocks.updateMempoolBlocks(newMempool, true);
+      mempoolBlocks.updateMempoolBlocks(newMempool);
     }
 
     const mBlocks = mempoolBlocks.getMempoolBlocks();
@@ -419,51 +418,47 @@ class WebsocketHandler {
 
     const _memPool = memPool.getMempool();
 
-    if (config.MEMPOOL.AUDIT) {
-      let projectedBlocks;
-      // template calculation functions have mempool side effects, so calculate audits using
-      // a cloned copy of the mempool if we're running a different algorithm for mempool updates
-      const auditMempool = (config.MEMPOOL.ADVANCED_GBT_AUDIT === config.MEMPOOL.ADVANCED_GBT_MEMPOOL) ? _memPool : deepClone(_memPool);
-      if (config.MEMPOOL.ADVANCED_GBT_AUDIT) {
-        projectedBlocks = await mempoolBlocks.makeBlockTemplates(auditMempool, false);
-      } else {
-        projectedBlocks = mempoolBlocks.updateMempoolBlocks(auditMempool, false);
-      }
+    if (config.MEMPOOL.ADVANCED_GBT_AUDIT) {
+      await mempoolBlocks.makeBlockTemplates(_memPool);
+    } else {
+      mempoolBlocks.updateMempoolBlocks(_memPool);
+    }
 
-      if (Common.indexingEnabled() && memPool.isInSync()) {
-        const { censored, added, fresh, score } = Audit.auditBlock(transactions, projectedBlocks, auditMempool);
-        const matchRate = Math.round(score * 100 * 100) / 100;
+    if (Common.indexingEnabled() && memPool.isInSync()) {
+      const projectedBlocks = mempoolBlocks.getMempoolBlocksWithTransactions();
 
-        const stripped = projectedBlocks[0]?.transactions ? projectedBlocks[0].transactions.map((tx) => {
-          return {
-            txid: tx.txid,
-            vsize: tx.vsize,
-            fee: tx.fee ? Math.round(tx.fee) : 0,
-            value: tx.value,
-          };
-        }) : [];
+      const { censored, added, fresh, score } = Audit.auditBlock(transactions, projectedBlocks, _memPool);
+      const matchRate = Math.round(score * 100 * 100) / 100;
 
-        BlocksSummariesRepository.$saveTemplate({
-          height: block.height,
-          template: {
-            id: block.id,
-            transactions: stripped
-          }
-        });
+      const stripped = projectedBlocks[0]?.transactions ? projectedBlocks[0].transactions.map((tx) => {
+        return {
+          txid: tx.txid,
+          vsize: tx.vsize,
+          fee: tx.fee ? Math.round(tx.fee) : 0,
+          value: tx.value,
+        };
+      }) : [];
 
-        BlocksAuditsRepository.$saveAudit({
-          time: block.timestamp,
-          height: block.height,
-          hash: block.id,
-          addedTxs: added,
-          missingTxs: censored,
-          freshTxs: fresh,
-          matchRate: matchRate,
-        });
-
-        if (block.extras) {
-          block.extras.matchRate = matchRate;
+      BlocksSummariesRepository.$saveTemplate({
+        height: block.height,
+        template: {
+          id: block.id,
+          transactions: stripped
         }
+      });
+
+      BlocksAuditsRepository.$saveAudit({
+        time: block.timestamp,
+        height: block.height,
+        hash: block.id,
+        addedTxs: added,
+        missingTxs: censored,
+        freshTxs: fresh,
+        matchRate: matchRate,
+      });
+
+      if (block.extras) {
+        block.extras.matchRate = matchRate;
       }
     }
 
@@ -476,9 +471,9 @@ class WebsocketHandler {
     }
 
     if (config.MEMPOOL.ADVANCED_GBT_MEMPOOL) {
-      await mempoolBlocks.updateBlockTemplates(_memPool, [], removed, true);
+      await mempoolBlocks.updateBlockTemplates(_memPool, [], removed);
     } else {
-      mempoolBlocks.updateMempoolBlocks(_memPool, true);
+      mempoolBlocks.updateMempoolBlocks(_memPool);
     }
     const mBlocks = mempoolBlocks.getMempoolBlocks();
     const mBlockDeltas = mempoolBlocks.getMempoolBlockDeltas();

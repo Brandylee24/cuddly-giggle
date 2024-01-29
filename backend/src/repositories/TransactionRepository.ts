@@ -3,6 +3,15 @@ import logger from '../logger';
 import { Ancestor, CpfpInfo } from '../mempool.interfaces';
 import cpfpRepository from './CpfpRepository';
 
+interface CpfpSummary {
+  txid: string;
+  cluster: string;
+  root: string;
+  txs: Ancestor[];
+  height: number;
+  fee_rate: number;
+}
+
 class TransactionRepository {
   public async $setCluster(txid: string, clusterRoot: string): Promise<void> {
     try {
@@ -63,9 +72,7 @@ class TransactionRepository {
         const txid = txRows[0].id.toLowerCase();
         const clusterId = txRows[0].root.toLowerCase();
         const cluster = await cpfpRepository.$getCluster(clusterId);
-        if (cluster) {
-          return this.convertCpfp(txid, cluster);
-        }
+        return this.convertCpfp(txid, cluster);
       }
     } catch (e) {
       logger.err('Cannot get transaction cpfp info from db. Reason: ' + (e instanceof Error ? e.message : e));
@@ -74,18 +81,13 @@ class TransactionRepository {
   }
 
   public async $removeTransaction(txid: string): Promise<void> {
-    try {
-      await DB.query(
-        `
-          DELETE FROM compact_transactions
-          WHERE txid = UNHEX(?)
-        `,
-        [txid]
-      );
-    } catch (e) {
-      logger.warn('Cannot delete transaction cpfp info from db. Reason: ' + (e instanceof Error ? e.message : e));
-      throw e;
-    }
+    await DB.query(
+      `
+        DELETE FROM compact_transactions
+        WHERE txid = UNHEX(?)
+      `,
+      [txid]
+    );
   }
 
   private convertCpfp(txid, cluster): CpfpInfo {
@@ -93,7 +95,7 @@ class TransactionRepository {
     const ancestors: Ancestor[] = [];
     let matched = false;
 
-    for (const tx of (cluster?.txs || [])) {
+    for (const tx of cluster.txs) {
       if (tx.txid === txid) {
         matched = true;
       } else if (!matched) {
