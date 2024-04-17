@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:20.04
 MAINTAINER mempool.space developers
 EXPOSE 50002
 
